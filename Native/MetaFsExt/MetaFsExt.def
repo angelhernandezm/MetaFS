@@ -1,0 +1,9 @@
+; MetaFsExt.def : Declares the module parameters.
+
+LIBRARY "MetaFsExt.dll"
+
+EXPORTS
+	DllCanUnloadNow		PRIVATE
+	DllGetClassObject	PRIVATE
+	DllRegisterServer	PRIVATE
+	DllUnregisterServer	PRIVATE

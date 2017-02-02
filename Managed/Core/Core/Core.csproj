@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BE64A6D7-736B-42DD-A7A1-A85995808B11}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Core</RootNamespace>
+    <AssemblyName>Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\..\..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\..\..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Abstractions\IChangeMonitor.cs" />
+    <Compile Include="Abstractions\IControlFactory.cs" />
+    <Compile Include="Abstractions\IDataOperations.cs" />
+    <Compile Include="Abstractions\IFileMetadata.cs" />
+    <Compile Include="Abstractions\IGenericLogger.cs" />
+    <Compile Include="Abstractions\INetworkOperations.cs" />
+    <Compile Include="Abstractions\IRenderer.cs" />
+    <Compile Include="Abstractions\ITemplateDefinition.cs" />
+    <Compile Include="Abstractions\IUIElement.cs" />
+    <Compile Include="Category.cs">
+      <DependentUpon>MetaFSDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Concrete\ControlFactory.cs" />
+    <Compile Include="Concrete\DataOperations.cs" />
+    <Compile Include="Concrete\FileMetadata.cs" />
+    <Compile Include="Concrete\GenericLogger.cs" />
+    <Compile Include="Concrete\NetworkOperations.cs" />
+    <Compile Include="Concrete\Renderer.cs" />
+    <Compile Include="Concrete\TemplateDefinition.cs" />
+    <Compile Include="Concrete\UIElement.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FileCatalogue.cs">
+      <DependentUpon>MetaFSDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Metadata.cs">
+      <DependentUpon>MetaFSDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MetaFSDB.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MetaFSDB.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MetaFSDB.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MetaFSDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MetaFSDB.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MetaFSDB.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="ObjectType.cs">
+      <DependentUpon>MetaFSDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegisteredPC.cs">
+      <DependentUpon>MetaFSDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="sysdiagram.cs">
+      <DependentUpon>MetaFSDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="TemplateCatalogue.cs">
+      <DependentUpon>MetaFSDB.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EntityDeploy Include="MetaFSDB.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>MetaFSDB.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.Config" />
+    <None Include="MetaFSDB.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>MetaFSDB.edmx</DependentUpon>
+      <LastGenOutput>MetaFSDB.Context.cs</LastGenOutput>
+    </None>
+    <None Include="MetaFSDB.edmx.diagram">
+      <DependentUpon>MetaFSDB.edmx</DependentUpon>
+    </None>
+    <None Include="MetaFSDB.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>MetaFSDB.edmx</DependentUpon>
+      <LastGenOutput>MetaFSDB.cs</LastGenOutput>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo F|xcopy "$(TargetPath)" %25windir%25 /y
+echo F|xcopy "$(TargetDir)EntityFramework.dll" %25windir%25 /y
+echo F|xcopy "$(TargetDir)EntityFramework.xml" %25windir%25 /y
+echo F|xcopy "$(TargetDir)EntityFramework.SqlServer.dll" %25windir%25 /y
+echo F|xcopy "$(TargetDir)EntityFramework.SqlServer.xml" %25windir%25 /y
+echo F|xcopy "$(TargetDir)Core.dll.config" %25windir%25\Explorer.exe.config /y
+echo F|xcopy "$(TargetPath)" ".\..\..\..\..\..\..\x64\Debug" /y
+echo F|xcopy "$(TargetDir)EntityFramework.dll" ".\..\..\..\..\..\..\x64\Debug" /y
+echo F|xcopy "$(TargetDir)EntityFramework.xml" ".\..\..\..\..\..\..\x64\Debug" /y
+echo F|xcopy "$(TargetDir)EntityFramework.SqlServer.dll" ".\..\..\..\..\..\..\x64\Debug" /y
+echo F|xcopy "$(TargetDir)EntityFramework.SqlServer.xml" ".\..\..\..\..\..\..\x64\Debug" /y
+echo F|xcopy "$(TargetDir)Core.dll.config" ".\..\..\..\..\..\..\Debug\x64\MetaFsService.exe.config" /y</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

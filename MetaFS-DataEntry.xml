@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<MetaFS-Data version="1.0" templateToUse="1">
+	<Data>
+		<UIElement name="txtComments" value="This is a comment coming from the database" />
+		<UIElement name="txtAdditionalInfo" value="Additional Information" />
+	</Data>
+</MetaFS-Data	>

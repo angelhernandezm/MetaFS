@@ -1,0 +1,394 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="MetaFS.Data.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Category">
+          <Key>
+            <PropertyRef Name="CategoryId" />
+          </Key>
+          <Property Name="CategoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CategoryName" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="FileCatalogue">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Fk_PCId" Type="int" Nullable="false" />
+          <Property Name="Fk_ObjectType" Type="int" Nullable="false" />
+          <Property Name="FileName" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="FullPath" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="Category" Type="varchar" MaxLength="50" />
+          <Property Name="SubCategory" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Metadata">
+          <Key>
+            <PropertyRef Name="MetaId" />
+          </Key>
+          <Property Name="MetaId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Fk_RowId" Type="int" Nullable="false" />
+          <Property Name="Fk_TemplateId" Type="int" Nullable="false" />
+          <Property Name="Metadata" Type="xml" />
+        </EntityType>
+        <EntityType Name="ObjectType">
+          <Key>
+            <PropertyRef Name="ObjectTypeId" />
+          </Key>
+          <Property Name="ObjectTypeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Description" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RegisteredPC">
+          <Key>
+            <PropertyRef Name="PCId" />
+          </Key>
+          <Property Name="PCId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="MacAddress" Type="varchar" MaxLength="36" Nullable="false" />
+          <Property Name="PCName" Type="varchar" MaxLength="24" Nullable="false" />
+          <Property Name="IsEnabled" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="sysdiagrams">
+          <Key>
+            <PropertyRef Name="diagram_id" />
+          </Key>
+          <Property Name="name" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="principal_id" Type="int" Nullable="false" />
+          <Property Name="diagram_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="version" Type="int" />
+          <Property Name="definition" Type="varbinary(max)" />
+        </EntityType>
+        <EntityType Name="TemplateCatalogue">
+          <Key>
+            <PropertyRef Name="TemplateId" />
+          </Key>
+          <Property Name="TemplateId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="VersionNumber" Type="int" Nullable="false" />
+          <Property Name="IsActive" Type="bit" />
+          <Property Name="Comments" Type="varchar" MaxLength="256" />
+          <Property Name="TemplateBody" Type="xml" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_FileCatalogue_ObjectType">
+          <End Role="ObjectType" Type="Self.ObjectType" Multiplicity="1" />
+          <End Role="FileCatalogue" Type="Self.FileCatalogue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ObjectType">
+              <PropertyRef Name="ObjectTypeId" />
+            </Principal>
+            <Dependent Role="FileCatalogue">
+              <PropertyRef Name="Fk_ObjectType" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_FileCatalogue_RegisteredPC">
+          <End Role="RegisteredPC" Type="Self.RegisteredPC" Multiplicity="1" />
+          <End Role="FileCatalogue" Type="Self.FileCatalogue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RegisteredPC">
+              <PropertyRef Name="PCId" />
+            </Principal>
+            <Dependent Role="FileCatalogue">
+              <PropertyRef Name="Fk_PCId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Metadata_FileCatalogue">
+          <End Role="FileCatalogue" Type="Self.FileCatalogue" Multiplicity="1" />
+          <End Role="Metadata" Type="Self.Metadata" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FileCatalogue">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Metadata">
+              <PropertyRef Name="Fk_RowId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Metadata_TemplateCatalogue">
+          <End Role="TemplateCatalogue" Type="Self.TemplateCatalogue" Multiplicity="1" />
+          <End Role="Metadata" Type="Self.Metadata" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TemplateCatalogue">
+              <PropertyRef Name="TemplateId" />
+            </Principal>
+            <Dependent Role="Metadata">
+              <PropertyRef Name="Fk_TemplateId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="MetaFSDataStoreContainer">
+          <EntitySet Name="Category" EntityType="Self.Category" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FileCatalogue" EntityType="Self.FileCatalogue" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Metadata" EntityType="Self.Metadata" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ObjectType" EntityType="Self.ObjectType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RegisteredPC" EntityType="Self.RegisteredPC" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TemplateCatalogue" EntityType="Self.TemplateCatalogue" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_FileCatalogue_ObjectType" Association="Self.FK_FileCatalogue_ObjectType">
+            <End Role="ObjectType" EntitySet="ObjectType" />
+            <End Role="FileCatalogue" EntitySet="FileCatalogue" />
+          </AssociationSet>
+          <AssociationSet Name="FK_FileCatalogue_RegisteredPC" Association="Self.FK_FileCatalogue_RegisteredPC">
+            <End Role="RegisteredPC" EntitySet="RegisteredPC" />
+            <End Role="FileCatalogue" EntitySet="FileCatalogue" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Metadata_FileCatalogue" Association="Self.FK_Metadata_FileCatalogue">
+            <End Role="FileCatalogue" EntitySet="FileCatalogue" />
+            <End Role="Metadata" EntitySet="Metadata" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Metadata_TemplateCatalogue" Association="Self.FK_Metadata_TemplateCatalogue">
+            <End Role="TemplateCatalogue" EntitySet="TemplateCatalogue" />
+            <End Role="Metadata" EntitySet="Metadata" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="MetaFS.Data" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Category">
+          <Key>
+            <PropertyRef Name="CategoryId" />
+          </Key>
+          <Property Name="CategoryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CategoryName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="FileCatalogue">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Fk_PCId" Type="Int32" Nullable="false" />
+          <Property Name="Fk_ObjectType" Type="Int32" Nullable="false" />
+          <Property Name="FileName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FullPath" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Category" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="SubCategory" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="ObjectType" Relationship="Self.FK_FileCatalogue_ObjectType" FromRole="FileCatalogue" ToRole="ObjectType" />
+          <NavigationProperty Name="RegisteredPC" Relationship="Self.FK_FileCatalogue_RegisteredPC" FromRole="FileCatalogue" ToRole="RegisteredPC" />
+          <NavigationProperty Name="Metadatas" Relationship="Self.FK_Metadata_FileCatalogue" FromRole="FileCatalogue" ToRole="Metadata" />
+        </EntityType>
+        <EntityType Name="Metadata">
+          <Key>
+            <PropertyRef Name="MetaId" />
+          </Key>
+          <Property Name="MetaId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Fk_RowId" Type="Int32" Nullable="false" />
+          <Property Name="Metadata1" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="FileCatalogue" Relationship="Self.FK_Metadata_FileCatalogue" FromRole="Metadata" ToRole="FileCatalogue" />
+          <Property Name="Fk_TemplateId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="TemplateCatalogue" Relationship="MetaFS.Data.FK_Metadata_TemplateCatalogue" FromRole="Metadata" ToRole="TemplateCatalogue" />
+        </EntityType>
+        <EntityType Name="ObjectType">
+          <Key>
+            <PropertyRef Name="ObjectTypeId" />
+          </Key>
+          <Property Name="ObjectTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Description" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="FileCatalogues" Relationship="Self.FK_FileCatalogue_ObjectType" FromRole="ObjectType" ToRole="FileCatalogue" />
+        </EntityType>
+        <EntityType Name="RegisteredPC">
+          <Key>
+            <PropertyRef Name="PCId" />
+          </Key>
+          <Property Name="PCId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MacAddress" Type="String" MaxLength="36" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IsEnabled" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="FileCatalogues" Relationship="Self.FK_FileCatalogue_RegisteredPC" FromRole="RegisteredPC" ToRole="FileCatalogue" />
+          <Property Name="PCName" Type="String" Nullable="false" MaxLength="24" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="sysdiagram">
+          <Key>
+            <PropertyRef Name="diagram_id" />
+          </Key>
+          <Property Name="name" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="principal_id" Type="Int32" Nullable="false" />
+          <Property Name="diagram_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="version" Type="Int32" />
+          <Property Name="definition" Type="Binary" MaxLength="Max" FixedLength="false" />
+        </EntityType>
+        <Association Name="FK_FileCatalogue_ObjectType">
+          <End Role="ObjectType" Type="Self.ObjectType" Multiplicity="1" />
+          <End Role="FileCatalogue" Type="Self.FileCatalogue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ObjectType">
+              <PropertyRef Name="ObjectTypeId" />
+            </Principal>
+            <Dependent Role="FileCatalogue">
+              <PropertyRef Name="Fk_ObjectType" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_FileCatalogue_RegisteredPC">
+          <End Role="RegisteredPC" Type="Self.RegisteredPC" Multiplicity="1" />
+          <End Role="FileCatalogue" Type="Self.FileCatalogue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RegisteredPC">
+              <PropertyRef Name="PCId" />
+            </Principal>
+            <Dependent Role="FileCatalogue">
+              <PropertyRef Name="Fk_PCId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Metadata_FileCatalogue">
+          <End Role="FileCatalogue" Type="Self.FileCatalogue" Multiplicity="1" />
+          <End Role="Metadata" Type="Self.Metadata" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FileCatalogue">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Metadata">
+              <PropertyRef Name="Fk_RowId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="MetaFSDB" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Categories" EntityType="Self.Category" />
+          <EntitySet Name="FileCatalogues" EntityType="Self.FileCatalogue" />
+          <EntitySet Name="Metadatas" EntityType="Self.Metadata" />
+          <EntitySet Name="ObjectTypes" EntityType="Self.ObjectType" />
+          <EntitySet Name="RegisteredPCs" EntityType="Self.RegisteredPC" />
+          <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagram" />
+          <AssociationSet Name="FK_FileCatalogue_ObjectType" Association="Self.FK_FileCatalogue_ObjectType">
+            <End Role="ObjectType" EntitySet="ObjectTypes" />
+            <End Role="FileCatalogue" EntitySet="FileCatalogues" />
+          </AssociationSet>
+          <AssociationSet Name="FK_FileCatalogue_RegisteredPC" Association="Self.FK_FileCatalogue_RegisteredPC">
+            <End Role="RegisteredPC" EntitySet="RegisteredPCs" />
+            <End Role="FileCatalogue" EntitySet="FileCatalogues" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Metadata_FileCatalogue" Association="Self.FK_Metadata_FileCatalogue">
+            <End Role="FileCatalogue" EntitySet="FileCatalogues" />
+            <End Role="Metadata" EntitySet="Metadatas" />
+          </AssociationSet>
+          <EntitySet Name="TemplateCatalogues" EntityType="MetaFS.Data.TemplateCatalogue" />
+          <AssociationSet Name="FK_Metadata_TemplateCatalogue" Association="MetaFS.Data.FK_Metadata_TemplateCatalogue">
+            <End Role="TemplateCatalogue" EntitySet="TemplateCatalogues" />
+            <End Role="Metadata" EntitySet="Metadatas" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="TemplateCatalogue">
+          <Key>
+            <PropertyRef Name="TemplateId" />
+          </Key>
+          <Property Name="TemplateId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="VersionNumber" Type="Int32" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="Comments" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="TemplateBody" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Metadatas" Relationship="MetaFS.Data.FK_Metadata_TemplateCatalogue" FromRole="TemplateCatalogue" ToRole="Metadata" />
+        </EntityType>
+        <Association Name="FK_Metadata_TemplateCatalogue">
+          <End Type="MetaFS.Data.TemplateCatalogue" Role="TemplateCatalogue" Multiplicity="1" />
+          <End Type="MetaFS.Data.Metadata" Role="Metadata" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TemplateCatalogue">
+              <PropertyRef Name="TemplateId" />
+            </Principal>
+            <Dependent Role="Metadata">
+              <PropertyRef Name="Fk_TemplateId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="MetaFSDataStoreContainer" CdmEntityContainer="MetaFSDB">
+          <EntitySetMapping Name="Categories">
+            <EntityTypeMapping TypeName="MetaFS.Data.Category">
+              <MappingFragment StoreEntitySet="Category">
+                <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
+                <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FileCatalogues">
+            <EntityTypeMapping TypeName="MetaFS.Data.FileCatalogue">
+              <MappingFragment StoreEntitySet="FileCatalogue">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="Fk_PCId" ColumnName="Fk_PCId" />
+                <ScalarProperty Name="Fk_ObjectType" ColumnName="Fk_ObjectType" />
+                <ScalarProperty Name="FileName" ColumnName="FileName" />
+                <ScalarProperty Name="FullPath" ColumnName="FullPath" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="SubCategory" ColumnName="SubCategory" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Metadatas">
+            <EntityTypeMapping TypeName="MetaFS.Data.Metadata">
+              <MappingFragment StoreEntitySet="Metadata">
+                <ScalarProperty Name="Fk_TemplateId" ColumnName="Fk_TemplateId" />
+                <ScalarProperty Name="MetaId" ColumnName="MetaId" />
+                <ScalarProperty Name="Fk_RowId" ColumnName="Fk_RowId" />
+                <ScalarProperty Name="Metadata1" ColumnName="Metadata" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ObjectTypes">
+            <EntityTypeMapping TypeName="MetaFS.Data.ObjectType">
+              <MappingFragment StoreEntitySet="ObjectType">
+                <ScalarProperty Name="ObjectTypeId" ColumnName="ObjectTypeId" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RegisteredPCs">
+            <EntityTypeMapping TypeName="MetaFS.Data.RegisteredPC">
+              <MappingFragment StoreEntitySet="RegisteredPC">
+                <ScalarProperty Name="PCName" ColumnName="PCName" />
+                <ScalarProperty Name="PCId" ColumnName="PCId" />
+                <ScalarProperty Name="MacAddress" ColumnName="MacAddress" />
+                <ScalarProperty Name="IsEnabled" ColumnName="IsEnabled" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="sysdiagrams">
+            <EntityTypeMapping TypeName="MetaFS.Data.sysdiagram">
+              <MappingFragment StoreEntitySet="sysdiagrams">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="principal_id" ColumnName="principal_id" />
+                <ScalarProperty Name="diagram_id" ColumnName="diagram_id" />
+                <ScalarProperty Name="version" ColumnName="version" />
+                <ScalarProperty Name="definition" ColumnName="definition" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TemplateCatalogues">
+            <EntityTypeMapping TypeName="MetaFS.Data.TemplateCatalogue">
+              <MappingFragment StoreEntitySet="TemplateCatalogue">
+                <ScalarProperty Name="TemplateBody" ColumnName="TemplateBody" />
+                <ScalarProperty Name="Comments" ColumnName="Comments" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="VersionNumber" ColumnName="VersionNumber" />
+                <ScalarProperty Name="TemplateId" ColumnName="TemplateId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

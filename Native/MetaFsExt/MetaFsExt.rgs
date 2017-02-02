@@ -1,0 +1,25 @@
+HKCR
+{
+    NoRemove CLSID
+    {
+        ForceRemove {7930DCFD-ECEF-492D-98C9-5DBC6F4C10CF} = s 'MetadataFileSystem Class'
+        {
+		    ProgID = s 'MetaFsExt.Shell.1' 
+            VersionIndependentProgID = s 'MetaFsExt.Shell'
+            InprocServer32 = s '%MODULE%'
+            {
+                val ThreadingModel = s 'Apartment'
+            }
+        }
+    }
+    NoRemove *
+    {
+        NoRemove shellex
+        {
+            NoRemove PropertySheetHandlers
+            {
+                {7930DCFD-ECEF-492D-98C9-5DBC6F4C10CF}
+            }
+        }
+    }
+}

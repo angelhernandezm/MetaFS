@@ -1,0 +1,56 @@
+// MetaFsExt.idl : IDL source for MetaFsExt
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (MetaFsExt.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(7BD43F13-3A92-4F1D-96E5-360770B6178F),
+	dual,
+	nonextensible,
+	helpstring("IMetaFsPropPage Interface"),
+	pointer_default(unique)
+]
+interface IMetaFsPropPage : IDispatch{
+};
+[
+	uuid(014288A3-7687-4BAB-9CFC-19F1CBC5726B),
+	version(1.0),
+	helpstring("MetaFS 1.0 Type Library")
+]
+
+interface IMetaFsUi : IDispatch {
+	
+};
+[
+	uuid(56B7B925-CEF2-43AA-8461-439B2D34F4B9),
+	version(1.0),
+	helpstring("MetaFS UI .Net Wrapper 1.0 Type Library")
+]
+
+library MetaFsExtLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(2865C5DF-1FEE-4C8C-9B2D-6297B912AB27)		
+	]
+	dispinterface _IMetaFsPropPageEvents
+	{
+		properties:
+		methods:
+	};
+	[
+		uuid(7930DCFD-ECEF-492D-98C9-5DBC6F4C10CF),	
+		helpstring("MetadataFileSystem Class")
+	]
+	coclass MetaFsPropPage
+	{
+		[default] interface IMetaFsPropPage;
+		[default, source] dispinterface _IMetaFsPropPageEvents;
+	};
+};
+
