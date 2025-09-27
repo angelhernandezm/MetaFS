@@ -77,9 +77,11 @@ namespace Core.Concrete {
 			if (targetAsm != null) {
 				definition.TemplateElements.ToList().ForEach(x => {
 
-					try {
-						var controlType = targetAsm.GetTypes().FirstOrDefault(z => z.IsSubclassOf(typeof(Control)) && !z.IsAbstract &&
-																				   z.Name.ToUpperInvariant().Contains(x.Class.ToUpperInvariant()));
+					try
+                    {
+                        var controlType = targetAsm.GetTypes().FirstOrDefault(z => z.IsSubclassOf(typeof(Control)) &&
+                            !z.IsAbstract &&
+                            string.Equals(z.Name, x.Class, StringComparison.OrdinalIgnoreCase));
 
 						// Expected to have a default constructor without any parameters
 						var control = controlType.GetConstructors(flag).FirstOrDefault().Invoke(null) as Control;
