@@ -1,0 +1,74 @@
+;; MetaFsDriver.inf — MiniFilter Driver Installation INF
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = "ActivityMonitor"
+ClassGuid   = {b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}
+Provider    = %ManufacturerName%
+DriverVer   = 09/25/2025,1.00.0000.0
+CatalogFile = MetaFsDriver.cat
+
+[Manufacturer]
+%ManufacturerName%=MetaFsDriver_Install,NTAMD64
+
+[MetaFsDriver_Install.NTAMD64]
+%ServiceDescription%=MetaFsDriver_Inst, Root\MetaFsDriver
+
+[MetaFsDriver_Inst]
+CopyFiles=MiniFilter.DriverFiles
+AddReg=MiniFilter.AddRegistry
+
+
+[DestinationDirs]
+DefaultDestDir=12
+MiniFilter.DriverFiles=12
+
+[MiniFilter.DriverFiles]
+MetaFsDriver.sys
+
+[DefaultInstall.ntx64]
+OptionDesc=%ServiceDescription%
+CopyFiles=MiniFilter.DriverFiles
+
+[DefaultInstall.Services.ntx64]
+AddService=%ServiceName%,,MiniFilter.Service
+
+[DefaultUninstall.ntx64]
+DelFiles=MiniFilter.DriverFiles
+
+[DefaultUninstall.Services]
+DelService=%ServiceName%,0x200
+
+[MiniFilter.Service]
+DisplayName=%ServiceName%
+Description=%ServiceDescription%
+ServiceBinary=%12%\MetaFsDriver.sys
+Dependencies=FltMgr
+ServiceType=2
+StartType=3
+ErrorControl=1
+LoadOrderGroup="FSFilter Activity Monitor"
+AddReg=MiniFilter.AddRegistry
+
+[MiniFilter.AddRegistry]
+HKR,,"DebugFlags",0x00010001,0x0
+HKR,,"SupportedFeatures",0x00010001,0x3
+HKR,"Instances","DefaultInstance",0x00000000,%DefaultInstance%
+HKR,"Instances\%Instance1.Name%","Altitude",0x00000000,%Instance1.Altitude%
+HKR,"Instances\%Instance1.Name%","Flags",0x00010001,%Instance1.Flags%
+
+[SourceDisksFiles]
+MetaFsDriver.sys=1,,
+
+[SourceDisksNames]
+1=%DiskId1%,,,
+
+[Strings]
+ManufacturerName="BonafideIdeas"
+ServiceDescription="MetaFsDriver Mini-Filter Driver"
+ServiceName="MetaFsDriver"
+DiskId1="MetaFsDriver Installation Disk"
+DefaultInstance="MetaFsDriver Instance"
+Instance1.Name="MetaFsDriver Instance"
+Instance1.Altitude="370030"
+Instance1.Flags=0x0

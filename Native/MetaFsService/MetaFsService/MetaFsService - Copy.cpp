@@ -5,7 +5,7 @@ SERVICE_STATUS        g_SvcStatus = {0};
 SERVICE_STATUS_HANDLE g_svcHandle = NULL;
 HANDLE				  g_filterEventHandle = INVALID_HANDLE_VALUE;
 HANDLE                g_svcStopNotification = INVALID_HANDLE_VALUE;
-static DWORD lastLogTick = 0;
+
 
 /// <summary>
 /// _tmains the specified argc.
@@ -32,63 +32,40 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
 
 VOID ManageDriver(DriverRequestType request) {
-	SC_HANDLE hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
-	if (!hSCManager) {
-		OutputDebugString(L"MetaFS Agent: Failed to open Service Control Manager.\n");
-		return;
-	}
+	SERVICE_STATUS ss;
+	SC_HANDLE hService;
+	SC_HANDLE hSCManager;
 
-	OutputDebugString(L"MetaFS Agent: SCManager opened.\n");
-
-	SC_HANDLE hService = OpenService(hSCManager, METAFS_DRIVE_NAME, SERVICE_START | SERVICE_QUERY_STATUS);
-	if (!hService && request == DriverRequestType::Load) {
-		// Service not found—create it
-		hService = CreateService(
-			hSCManager,
-			METAFS_DRIVE_NAME,
-			METAFS_DRIVE_NAME,
-			SERVICE_START,
-			SERVICE_KERNEL_DRIVER,
-			SERVICE_DEMAND_START,
-			SERVICE_ERROR_IGNORE,
-			METAFS_DRIVER_PATH,
-			NULL, NULL, NULL, NULL, NULL
-		);
-
-		if (!hService) {
-			OutputDebugString(L"MetaFS Agent: Failed to create driver service.\n");
-			CloseServiceHandle(hSCManager);
-			return;
-		}
-
-		OutputDebugString(L"MetaFS Agent: Driver service created.\n");
-	}
-
-	if (hService && request == DriverRequestType::Load) {
-		if (!StartService(hService, 0, NULL)) {
-			DWORD err = GetLastError();
-			if (err == ERROR_SERVICE_ALREADY_RUNNING) {
-				OutputDebugString(L"MetaFS Agent: Driver already running.\n");
+	OutputDebugString(L"MetaFS Agent: Managing Driver...\n");
+	if ((hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE)) != NULL) {
+		OutputDebugString(L"MetaFS Agent: SCManager was opened...\n");
+		if (request == DriverRequestType::Load) {
+			if ((hService = CreateService(hSCManager, METAFS_DRIVE_NAME, METAFS_DRIVE_NAME, SERVICE_START | DELETE | SERVICE_STOP,
+				SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE,
+				METAFS_DRIVER_PATH, NULL, NULL, NULL, NULL, NULL)) == NULL) {
+				hService = OpenService(hSCManager, METAFS_DRIVE_NAME, SERVICE_START | DELETE | SERVICE_STOP);
+				OutputDebugString(L"MetaFS Agent: Driver was loaded...\n");
 			}
-			else {
-				OutputDebugString(L"MetaFS Agent: Failed to start driver service.\n");
+
+			if (hService != NULL) {
+				StartService(hService, NULL, NULL);
+				InitializeCommunicationWithDriver();
+				CloseHandle(hService);
+				OutputDebugString(L"MetaFS Agent: Driver loaded and communication established...\n");
+			}
+		} else {
+			if ((hService = OpenService(hSCManager, METAFS_DRIVE_NAME, SERVICE_START | DELETE | SERVICE_STOP)) != NULL) {
+				ControlService(hService, SERVICE_CONTROL_STOP, &ss);
+				CloseServiceHandle(hService);
+				DeleteService(hService);
+				OutputDebugString(L"MetaFS Agent: Driver was removed...\n");
 			}
 		}
-		else {
-			OutputDebugString(L"MetaFS Agent: Driver service started.\n");
-		}
-
-		InitializeCommunicationWithDriver();
+		CloseServiceHandle(hSCManager);
+		OutputDebugString(L"MetaFS Agent: Driver was unloaded...\n");
 	}
 
-	if (hService) {
-		CloseServiceHandle(hService);
-	}
-
-	CloseServiceHandle(hSCManager);
-	OutputDebugString(L"MetaFS Agent: Driver management complete.\n");
 }
-
 
 /// <summary>
 /// Services the controller.
@@ -133,8 +110,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv) {
 		OutputDebugString(L"MetaFS Agent: Failed to create stop notification event...\n");
 		WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Failed to create stop notification event."));
 		ConfigureService(ConfigOption::STOP_SERVICE);
-		g_SvcStatus.dwCheckPoint++;
-		g_SvcStatus.dwWaitHint = 10000;
 		SetServiceStatus(g_svcHandle, &g_SvcStatus);
 		return;
 	}
@@ -162,17 +137,12 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv) {
 /// <param name="lpParam">The lp parameter.</param>
 /// <returns>DWORD.</returns>
 DWORD WINAPI AsyncFilterWorker(LPVOID lpParam) {
-	HANDLE events[2] = { g_svcStopNotification, g_filterEventHandle };
-	while (true) {
-		DWORD waitResult = WaitForMultipleObjects(2, events, FALSE, INFINITE);
-		if (waitResult == WAIT_OBJECT_0) break; // Stop signal
-		if (waitResult == WAIT_OBJECT_0 + 1) {			
-			DWORD now = GetTickCount();
-			if (now - lastLogTick > 1000) {
-				OutputDebugString(L"MetaFS Agent: Notification from driver...\n");
-				lastLogTick = now;
-			}
-			SetEvent(g_filterEventHandle); // Reset for next signal
+	while (WaitForSingleObject(g_svcStopNotification, INFINITE) != WAIT_OBJECT_0) {
+		// Has there been changes to the filesystem?
+		if (WaitForSingleObject(g_filterEventHandle, INFINITE) != WAIT_OBJECT_0) {
+			WriteEvent(EventInformation(EventType::INFORMATION_TYPE, L"Notification from driver..."));
+			OutputDebugString(L"MetaFS Agent: Notification from driver...\n");
+			SetEvent(g_filterEventHandle);
 		}
 	}
 	return ERROR_SUCCESS;
@@ -196,6 +166,7 @@ VOID ConfigureService(ConfigOption option) {
 		break;
 
 	case ConfigOption::STOP_SERVICE:
+		ManageDriver(DriverRequestType::Unload);
 		g_SvcStatus.dwControlsAccepted = 0;
 		g_SvcStatus.dwCurrentState = SERVICE_STOPPED;
 		g_SvcStatus.dwWin32ExitCode = GetLastError();
@@ -233,8 +204,7 @@ VOID InitializeClr() {
 
 	SetErrorMode(NULL);
 
-	if (hInstance) 
-		FreeLibrary(hInstance);
+	FreeLibrary(hInstance);
 }
 
 /// <summary>
