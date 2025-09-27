@@ -16,11 +16,13 @@ HANDLE                g_svcStopNotification = INVALID_HANDLE_VALUE;
 int _tmain(int argc, _TCHAR* argv[]) {
 	auto retval = 0;
 
+	OutputDebugString(L"MetaFS Agent: Starting CLR...\n");
 	InitializeClr();
 
 	SERVICE_TABLE_ENTRY ServiceTable[] = {{SERVICE_NAME, ServiceMain}};
 
 	if (!StartServiceCtrlDispatcher(ServiceTable)) {
+		OutputDebugString(L"MetaFS Agent: Unable to start service...\n");
 		WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Unable to start MetaFSAgent Service."));
 		retval = GetLastError();
 	}
@@ -30,34 +32,63 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
 
 VOID ManageDriver(DriverRequestType request) {
-	SERVICE_STATUS ss;
-	SC_HANDLE hService;
-	SC_HANDLE hSCManager;
-
-	if ((hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE)) != NULL) {
-		if (request == DriverRequestType::Load) {
-			if ((hService = CreateService(hSCManager, METAFS_DRIVE_NAME, METAFS_DRIVE_NAME, SERVICE_START | DELETE | SERVICE_STOP,
-				SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE,
-				METAFS_DRIVER_PATH, NULL, NULL, NULL, NULL, NULL)) == NULL) {
-				hService = OpenService(hSCManager, METAFS_DRIVE_NAME, SERVICE_START | DELETE | SERVICE_STOP);
-			}
-
-			if (hService != NULL) {
-				StartService(hService, NULL, NULL);
-				InitializeCommunicationWithDriver();
-				CloseHandle(hService);
-			}
-		} else {
-			if ((hService = OpenService(hSCManager, METAFS_DRIVE_NAME, SERVICE_START | DELETE | SERVICE_STOP)) != NULL) {
-				ControlService(hService, SERVICE_CONTROL_STOP, &ss);
-				CloseServiceHandle(hService);
-				DeleteService(hService);
-			}
-		}
-		CloseServiceHandle(hSCManager);
+	SC_HANDLE hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	if (!hSCManager) {
+		OutputDebugString(L"MetaFS Agent: Failed to open Service Control Manager.\n");
+		return;
 	}
 
+	OutputDebugString(L"MetaFS Agent: SCManager opened.\n");
+
+	SC_HANDLE hService = OpenService(hSCManager, METAFS_DRIVE_NAME, SERVICE_START | SERVICE_QUERY_STATUS);
+	if (!hService && request == DriverRequestType::Load) {
+		// Service not found—create it
+		hService = CreateService(
+			hSCManager,
+			METAFS_DRIVE_NAME,
+			METAFS_DRIVE_NAME,
+			SERVICE_START,
+			SERVICE_KERNEL_DRIVER,
+			SERVICE_DEMAND_START,
+			SERVICE_ERROR_IGNORE,
+			METAFS_DRIVER_PATH,
+			NULL, NULL, NULL, NULL, NULL
+		);
+
+		if (!hService) {
+			OutputDebugString(L"MetaFS Agent: Failed to create driver service.\n");
+			CloseServiceHandle(hSCManager);
+			return;
+		}
+
+		OutputDebugString(L"MetaFS Agent: Driver service created.\n");
+	}
+
+	if (hService && request == DriverRequestType::Load) {
+		if (!StartService(hService, 0, NULL)) {
+			DWORD err = GetLastError();
+			if (err == ERROR_SERVICE_ALREADY_RUNNING) {
+				OutputDebugString(L"MetaFS Agent: Driver already running.\n");
+			}
+			else {
+				OutputDebugString(L"MetaFS Agent: Failed to start driver service.\n");
+			}
+		}
+		else {
+			OutputDebugString(L"MetaFS Agent: Driver service started.\n");
+		}
+
+		InitializeCommunicationWithDriver();
+	}
+
+	if (hService) {
+		CloseServiceHandle(hService);
+	}
+
+	CloseServiceHandle(hSCManager);
+	OutputDebugString(L"MetaFS Agent: Driver management complete.\n");
 }
+
 
 /// <summary>
 /// Services the controller.
@@ -71,6 +102,7 @@ VOID WINAPI ServiceController(DWORD ctlCode) {
 			if (SetServiceStatus(g_svcHandle, &g_SvcStatus)) {
 				SetEvent(g_filterEventHandle);
 				SetEvent(g_svcStopNotification);
+				OutputDebugString(L"MetaFS Agent: Stopped...\n");
 				WriteEvent(EventInformation(EventType::INFORMATION_TYPE, L"MetaFS Agent Service stopped.\nVersion 1.0.0.0.\n\nChanges made to metadata on existing filesystem objects will not be monitored"));
 			} else WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Unable to change status of MetaFSAgent Service (Stop Pending)."));
 		}
@@ -84,29 +116,42 @@ VOID WINAPI ServiceController(DWORD ctlCode) {
 /// <param name="argc">The argc.</param>
 /// <param name="argv">The argv.</param>
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv) {
-	HANDLE hThread;
+	g_svcHandle = RegisterServiceCtrlHandler(SERVICE_NAME, ServiceController);
+	if (!g_svcHandle) {
+		OutputDebugString(L"MetaFS Agent: Failed to register service control handler...\n");
+		WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Failed to register service control handler."));
+		return;
+	}
 
-	if ((g_svcHandle = RegisterServiceCtrlHandler(SERVICE_NAME, ServiceController)) != NULL) {
-		ConfigureService(ConfigOption::START_SERVICE);
-		if (SetServiceStatus(g_svcHandle, &g_SvcStatus)) {
-			if ((g_svcStopNotification = CreateEvent(NULL, TRUE, FALSE, NULL)) != NULL) {
-				ConfigureService(ConfigOption::RUNNING_SERVICE);
-				if (SetServiceStatus(g_svcHandle, &g_SvcStatus)) {
-					WriteEvent(EventInformation(EventType::INFORMATION_TYPE, L"MetaFS Agent Service started.\nVersion 1.0.0.0"));
-					hThread = CreateThread(NULL, NULL, AsyncFilterWorker, NULL, NULL, NULL);
-					WaitForSingleObject(hThread, INFINITE);
-					CloseHandle(g_svcStopNotification);
-					ConfigureService(ConfigOption::STOPPED_SERVICE);
-					SetServiceStatus(g_svcHandle, &g_SvcStatus);
-					CloseHandle(hThread);
-				} else WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Unable to change status of MetaFSAgent Service (Running)."));
-			} else {
-				WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Unable to CreateEvent(g_ServiceStopEvent) for MetaFSAgent Service."));
-				ConfigureService(ConfigOption::STOP_SERVICE);
-				SetServiceStatus(g_svcHandle, &g_SvcStatus);
-			}
-		} else WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Unable to change status of MetaFSAgent Service (Started)."));
-	} else WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Unable to start MetaFSAgent Service."));
+	// Report SERVICE_START_PENDING
+	ConfigureService(ConfigOption::START_SERVICE);
+	SetServiceStatus(g_svcHandle, &g_SvcStatus);
+
+	// Create stop notification event
+	g_svcStopNotification = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (!g_svcStopNotification) {
+		OutputDebugString(L"MetaFS Agent: Failed to create stop notification event...\n");
+		WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Failed to create stop notification event."));
+		ConfigureService(ConfigOption::STOP_SERVICE);
+		SetServiceStatus(g_svcHandle, &g_SvcStatus);
+		return;
+	}
+
+	// Report SERVICE_RUNNING
+	ConfigureService(ConfigOption::RUNNING_SERVICE);
+	SetServiceStatus(g_svcHandle, &g_SvcStatus);
+	OutputDebugString(L"MetaFS Agent: Service is running...\n");
+	WriteEvent(EventInformation(EventType::INFORMATION_TYPE, L"MetaFS Agent Service started.\nVersion 1.0.0.0"));
+
+	// Launch worker thread
+	HANDLE hThread = CreateThread(NULL, 0, AsyncFilterWorker, NULL, 0, NULL);
+	if (!hThread) {
+		OutputDebugString(L"MetaFS Agent: Failed to create worker thread...\n");
+		WriteEvent(EventInformation(EventType::ERROR_TYPE, L"Failed to create worker thread."));
+		ConfigureService(ConfigOption::STOP_SERVICE);
+		SetServiceStatus(g_svcHandle, &g_SvcStatus);
+		return;
+	}
 }
 
 /// <summary>
@@ -119,6 +164,7 @@ DWORD WINAPI AsyncFilterWorker(LPVOID lpParam) {
 		// Has there been changes to the filesystem?
 		if (WaitForSingleObject(g_filterEventHandle, INFINITE) != WAIT_OBJECT_0) {
 			WriteEvent(EventInformation(EventType::INFORMATION_TYPE, L"Notification from driver..."));
+			OutputDebugString(L"MetaFS Agent: Notification from driver...\n");
 			SetEvent(g_filterEventHandle);
 		}
 	}
@@ -176,6 +222,7 @@ VOID InitializeClr() {
 	if ((hInstance = LoadLibraryEx(INTEROP_LIBRARY, NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)) != NULL) {
 		ptrInitializeClr funcPtr = (ptrInitializeClr)GetProcAddress(hInstance, "InitializeClr");
 		funcPtr();
+		OutputDebugString(L"MetaFS Agent: CLR was loaded...\n");
 	}
 
 	SetErrorMode(NULL);
@@ -190,12 +237,14 @@ VOID InitializeCommunicationWithDriver() {
 	HANDLE hFile;
 	DWORD cbSize;
 
+	OutputDebugString(L"MetaFS Agent: Initializing communication with driver...\n");
 	if ((hFile = CreateFile(TARGET_DRIVER, GENERIC_READ | GENERIC_WRITE,
 		0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL)) != INVALID_HANDLE_VALUE) {
-
+		OutputDebugString(L"MetaFS Agent: Symlink created...\n");
 		if ((g_filterEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL)) != NULL) {
 			if (DeviceIoControl(hFile, IOCTL_REGISTER_EVENT, &g_filterEventHandle, sizeof(g_filterEventHandle), NULL, NULL, &cbSize, NULL))
 				WriteEvent(EventInformation(EventType::INFORMATION_TYPE, L"Event successfully created...."));
+			OutputDebugString(L"MetaFS Agent: Event successfully created...\n");
 		}
 		CloseHandle(hFile);
 	}
