@@ -1,0 +1,34 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/MetaFS
+/bin
+/Debug
+/Database/MetaFSDB/bin/Debug
+/Database/MetaFSDB/MetaFSDB.jfm
+/Database/MetaFSDB/obj/Debug
+/Managed/Core/Core/.vs
+/Managed/Core/Core/bin
+/Managed/Core/Core/obj
+/Native/MetaFsDriver/MetaFsDriver/Win8.1 Debug
+/Native/MetaFsDriver/MetaFsDriver/x64/Win8.1 Debug
+/Native/MetaFsDriver/MetaFsDriver/MetaFsDriver.txt
+/Native/MetaFsDriver/MetaFsDriver/MetaFsDriver.vcxproj.filters
+/Native/MetaFsDriver/MetaFsDriver/precomp.h
+/MetaFSPropPage/.vs
+/MetaFSPropPage/bin
+/MetaFSPropPage/obj
+/TestHarness/TestHarness
+/x64
+/Native/MetaFsService/MetaFsService/Debug
+/Native/MetaFsService/MetaFsService/x64/Debug
+/Native/MetaFsService/MetaFsService/x64/Debug/MetaFsService.vcxproj.FileListAbsolute.txt
+/Native/MetaFsInterop/MetaFsInterop/Debug
+/Native/MetaFsInterop/MetaFsInterop/x64/Debug
+/Native/MetaFsExt/Debug
+/Native/MetaFsExt/x64/Debug
+/Native/MetaFsExt/RCa35944
+/Native/MetaFsExt/RDa35944
+/Native/MetaFsDriver/MetaFsDriver Package/Win8.1 Debug
+/Native/MetaFsDriver/MetaFsDriver Package/x64/Win8.1 Debug

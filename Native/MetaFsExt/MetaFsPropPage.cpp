@@ -1,24 +1,8 @@
-// Copyright (C) 2015 Angel Hernandez Matos / Bonafide Ideas.
-// You can redistribute this software and/or modify it under the terms of the 
-// Microsoft Reciprocal License (Ms-RL).  This program is distributed in the hope 
-// that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-// See License.txt for more details. 
-
-/* C++ compiler   : Microsoft (R) C/C++ Optimizing Compiler Version 18.00.31101 for x64
-Creation date     : 09/06/2015
-Developer         : Angel Hernandez Matos
-e-m@il            : angel@bonafideideas.com
-Website           : http://www.bonafideideas.com
-
-Description: Implementation of CMetaFsPropPage
-*/
-
 #include "stdafx.h"
 #include "MetaFsPropPage.h"
 #include <CommCtrl.h>
 
-#import "..\..\MetaFSPropPage\bin\x64\Debug\MetaFSPropPage.tlb" 
+#import "C:\\Code\\MetaFS\\MetaFSPropPage\\bin\\Debug\\MetaFSPropPage.tlb"
 
 WNDPROC pWndProc;
 
@@ -147,20 +131,8 @@ HRESULT CMetaFsPropPage::ReplacePage(IN UINT uPageID, IN LPFNADDPROPSHEETPAGE lp
 	return E_FAIL;
 }
 
-
-HRESULT CMetaFsPropPage::AddPages(IN LPFNADDPROPSHEETPAGE lpfnAddPage, IN LPARAM lParam) {
-	HPROPSHEETPAGE hPage;
-	PROPSHEETPAGE psp = {0};
-	auto retval = E_INVALIDARG;
-	psp.dwSize = sizeof(PROPSHEETPAGE);
-	psp.dwFlags = PSP_USEREFPARENT | PSP_USETITLE | PSP_DEFAULT;
-	psp.hInstance = _AtlBaseModule.GetResourceInstance();
-	psp.pszTemplate = MAKEINTRESOURCE(IDD_EMPTYPAGE);
-	psp.pszTitle = _T("File Metadata");
-	psp.pcRefParent = NULL;
-	psp.lParam = reinterpret_cast<LPARAM>(new wstring(m_szFile.data()));
-
-	psp.pfnDlgProc = [](HWND hwnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)->LRESULT {
+static INT_PTR CALLBACK MetaFsDialogProcThunk(HWND hwnd, UINT uiMsg, WPARAM wParam, LPARAM lParam) {
+	return [](HWND hwnd, UINT uiMsg, WPARAM wParam, LPARAM lParam) -> LRESULT {
 		switch (uiMsg) {
 		case WM_INITDIALOG:
 			CoInitialize(NULL);
@@ -177,7 +149,25 @@ HRESULT CMetaFsPropPage::AddPages(IN LPFNADDPROPSHEETPAGE lpfnAddPage, IN LPARAM
 			break;
 		}
 		return FALSE;
-	};
+
+		}(hwnd, uiMsg, wParam, lParam);
+}
+
+
+
+HRESULT CMetaFsPropPage::AddPages(IN LPFNADDPROPSHEETPAGE lpfnAddPage, IN LPARAM lParam) {
+	HPROPSHEETPAGE hPage;
+	PROPSHEETPAGE psp = {0};
+	auto retval = E_INVALIDARG;
+	psp.dwSize = sizeof(PROPSHEETPAGE);
+	psp.dwFlags = PSP_USEREFPARENT | PSP_USETITLE | PSP_DEFAULT;
+	psp.hInstance = _AtlBaseModule.GetResourceInstance();
+	psp.pszTemplate = MAKEINTRESOURCE(IDD_EMPTYPAGE);
+	psp.pszTitle = _T("File Metadata");
+	psp.pcRefParent = NULL;
+	psp.lParam = reinterpret_cast<LPARAM>(new wstring(m_szFile.data()));
+	psp.pfnDlgProc = MetaFsDialogProcThunk;
+
 
 	if ((hPage = CreatePropertySheetPage(&psp)) != NULL) {
 		if (!lpfnAddPage(hPage, lParam))

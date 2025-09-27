@@ -1,26 +1,8 @@
-﻿// Copyright (C) 2015 Angel Hernandez Matos / Bonafide Ideas.
-// You can redistribute this software and/or modify it under the terms of the 
-// Microsoft Reciprocal License (Ms-RL).  This program is distributed in the hope 
-// that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-// See License.txt for more details. 
-
-/* C# compiler    : Microsoft (R) Visual C# Compiler version 12.0.31101.0 for C# 5
-Creation date     : 09/06/2015
-Developer         : Angel Hernandez Matos
-e-m@il            : angel@bonafideideas.com
-Website           : http://www.bonafideideas.com
-
-Description: Network Operations
-*/
-
+﻿using Core.Abstractions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
-using System.Threading.Tasks;
-using Core.Abstractions;
 
 namespace Core.Concrete {
 	public class NetworkOperations : INetworkOperations {
@@ -53,10 +35,12 @@ namespace Core.Concrete {
 			}
 		}
 
-
-
-
-		public string GetMacAddress() {
+        /// <summary>
+        /// Gets the mac address.
+        /// </summary>
+        /// <returns>System.String.</returns>
+        /// <exception cref="System.NullReferenceException">NIC not found. One is required at least</exception>
+        public string GetMacAddress() {
 			var index = 0;
 			var retval = new StringBuilder();
 

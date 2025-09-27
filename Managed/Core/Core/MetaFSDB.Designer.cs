@@ -1,4 +1,4 @@
-﻿// T4 code generation is enabled for model 'C:\Temp\MetaFS\MetaFS\Managed\Core\Core\MetaFSDB.edmx'. 
+﻿// T4 code generation is enabled for model 'C:\Code\R&D\MetaFS\Managed\Core\Core\MetaFSDB.edmx'. 
 // To enable legacy code generation, change the value of the 'Code Generation Strategy' designer
 // property to 'Legacy ObjectContext'. This property is available in the Properties Window when the model
 // is open in the designer.

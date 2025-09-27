@@ -1,23 +1,10 @@
-// Copyright (C) 2015 Angel Hernandez Matos / Bonafide Ideas.
-// You can redistribute this software and/or modify it under the terms of the 
-// Microsoft Reciprocal License (Ms-RL).  This program is distributed in the hope 
-// that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-// See License.txt for more details. 
-
-/* C++ compiler   : Microsoft (R) C/C++ Optimizing Compiler Version 18.00.31101 for x64
-Creation date     : 09/06/2015
-Developer         : Angel Hernandez Matos
-e-m@il            : angel@bonafideideas.com
-Website           : http://www.bonafideideas.com
-
-Description: This is the main module of the MetaFsDriver miniFilter driver.
-*/
-
 #include <fltKernel.h>
 #include <wdm.h>
-#include <dontuse.h>
-#include <suppress.h>
+//// #include <ntddk.h>  // For WDM drivers
+//
+//#include <dontuse.h>
+//#include <suppress.h>
+//#include <windows.h>
 
 #pragma prefast(disable:__WARNING_ENCODE_MEMBER_FUNCTION_POINTER, "Not valid for kernel mode drivers")
 

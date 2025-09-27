@@ -9,8 +9,8 @@ Signature   = "$Windows NT$"
 ; ClassGuid   = {b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}    ;This value is determined by the Load Order Group value
 Class = "ActivityMonitor"
 ClassGuid = {b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}
-Provider    = BonafideIdeas
-DriverVer   = 06/10/2015,1.00.0000.0
+Provider    = AngelHernandez
+DriverVer   = 9/25/2025,1.00.0000.0
 CatalogFile = MetaFsDriver.cat
 
 [DestinationDirs]
@@ -21,18 +21,18 @@ MiniFilter.DriverFiles  = 12            ;%windir%\system32\drivers
 ;; Default install sections
 ;;
 
-[DefaultInstall]
+[DefaultInstall.ntx64]
 OptionDesc          = %ServiceDescription%
 CopyFiles           = MiniFilter.DriverFiles
 
-[DefaultInstall.Services]
+[DefaultInstall.Services.ntx64]
 AddService          = %ServiceName%,,MiniFilter.Service
 
 ;;
 ;; Default uninstall sections
 ;;
 
-[DefaultUninstall]
+[DefaultUninstall.ntx64]
 DelFiles   = MiniFilter.DriverFiles
 
 [DefaultUninstall.Services]

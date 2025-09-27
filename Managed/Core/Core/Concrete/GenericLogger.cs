@@ -14,12 +14,8 @@ Website           : http://www.bonafideideas.com
 Description: Implementation of GenericLogger
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Core.Abstractions;
+using System;
 
 namespace Core.Concrete {
 	public class GenericLogger : IGenericLogger {
