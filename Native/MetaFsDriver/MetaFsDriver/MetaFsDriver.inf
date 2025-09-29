@@ -64,7 +64,7 @@ MetaFsDriver.sys=1,,
 1=%DiskId1%,,,
 
 [Strings]
-ManufacturerName="BonafideIdeas"
+ManufacturerName="Angel Hernandez"
 ServiceDescription="MetaFsDriver Mini-Filter Driver"
 ServiceName="MetaFsDriver"
 DiskId1="MetaFsDriver Installation Disk"

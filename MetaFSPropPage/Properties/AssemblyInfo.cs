@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MetaFSPropPage")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("BonafideIdeas")]
+[assembly: AssemblyCompany("Angel Hernandez")]
 [assembly: AssemblyProduct("MetaFSPropPage")]
-[assembly: AssemblyCopyright("Copyright © BonafideIdeas 2015")]
+[assembly: AssemblyCopyright("Copyright © Angel Hernandez 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
